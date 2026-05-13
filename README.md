@@ -6,7 +6,6 @@ GPU-Accelerated Sprite Baker for Unity
 - [Tech Stack](#tech-stack)
 - [Images](#images)
 
-___
 ## Installation
 1. Open your terminal or command prompt.
 2. Navigate to your Unity project's Assets/Plugins folder:
@@ -22,13 +21,11 @@ ___
     ```
 And you're done! SpriteBaker will now appear in your project. You can attach it to any GameObject as a component.
 
----
 ## Features
 - GPU-side sprite composition (No CPU overhead).
 - Support for multiple sprites with custom positions and sizes.
 - RenderTexture-based output for dynamic materials.
 
----
 ## Performance
 This plugin is designed to offload heavy texture operations from the CPU to the GPU, utilizing the parallel processing power of Compute Shaders.
 <br></br>
@@ -47,11 +44,9 @@ Traditional texture baking in Unity often relies on Texture2D.SetPixels, which r
 |Memory Transfer |High (CPU to RAM) |Low (Stay on VRAM)|
 |Latency |Heavy (Millisecond range) |Ultra-Low (Microsecond range)|
 
----
 ## Tech Stack
 Unity, HLSL, Compute Shaders.
 
----
 ## Images
 
 |Tests|
