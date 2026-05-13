@@ -1,5 +1,6 @@
 # SpriteBaker
 GPU-Accelerated Sprite Baker for Unity
+- [Installation](#installation)
 - [Features](#features)
 - [Performance](#performance)
 - [Tech Stack](#tech-stack)
