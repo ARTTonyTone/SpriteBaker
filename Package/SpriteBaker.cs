@@ -12,13 +12,12 @@ public struct TextureData
     public Vector2 canvasSize;
 }
 
-[ExecuteInEditMode] // Editor'de çalışması için kritik
-public class BakedSprite : MonoBehaviour
+[ExecuteInEditMode]
+public class SpriteBaker : MonoBehaviour
 {
     [Header("Settings")]
-    // [SerializeField] private Sprite _baseSprite;
-    [SerializeField] private List<Sprite> _spriteLibrary; // Array katmanları
-    [SerializeField] private List<TextureData> _sprites; // Yerleşim verileri
+    [SerializeField] private List<Sprite> _spriteLibrary; 
+    [SerializeField] private List<TextureData> _sprites;
     [SerializeField] private ComputeShader _computeShader;
 
     private RenderTexture _renderTexture;
@@ -26,7 +25,7 @@ public class BakedSprite : MonoBehaviour
     private MaterialPropertyBlock _propBlock;
     private Renderer _renderer;
 
-    // Editor'de herhangi bir değer değiştiğinde tetiklenir
+ 
     private void Start() {
         if (_computeShader != null)
         {
@@ -49,6 +48,8 @@ public class BakedSprite : MonoBehaviour
 
         int kernel = _computeShader.FindKernel("CSMain");
 
+        SetDatas();
+
         CaldulateTextureSize(out int width, out int height);
 
         if (width <= 0 || height <= 0) return;
@@ -62,7 +63,6 @@ public class BakedSprite : MonoBehaviour
             _renderTexture.Create();
         }
 
-        SetDatas();
 
         _dataBuffer?.Release();
         _dataBuffer = new ComputeBuffer(_sprites.Count, Marshal.SizeOf(typeof(TextureData)));
@@ -71,10 +71,6 @@ public class BakedSprite : MonoBehaviour
         _computeShader.SetBuffer(kernel, "TextureDataBuffer", _dataBuffer);
         _computeShader.SetTexture(kernel, "Result", _renderTexture);
 
-        // int threadGroupsX = Mathf.CeilToInt(width / 8f);
-        // int threadGroupsY = Mathf.CeilToInt(height / 8f);
-        // _computeShader.Dispatch(kernel, threadGroupsX, threadGroupsY, 1);
-
         foreach (var item in _spriteLibrary)
         {
             if(item == null) continue;
@@ -82,13 +78,15 @@ public class BakedSprite : MonoBehaviour
             _computeShader.SetInt("DataIndex", _spriteLibrary.IndexOf(item));
             int threadGroupsX = Mathf.CeilToInt(width / 8f);
             int threadGroupsY = Mathf.CeilToInt(height / 8f);
-            Debug.Log($"Kernel: {kernel}, DataIndex: {_spriteLibrary.IndexOf(item)}, Sprite: {item.name}");
              _computeShader.Dispatch(kernel, threadGroupsX, threadGroupsY, 1);
         }
         ApplyToMaterial();
     }
     private void SetDatas()
     {
+        _sprites ??= new();
+        _spriteLibrary ??= new();
+
         if (_sprites.Count < _spriteLibrary.Count)
             _sprites.Add(new TextureData());
         else if (_sprites.Count > _spriteLibrary.Count)
@@ -97,7 +95,7 @@ public class BakedSprite : MonoBehaviour
         for (int i = 0; i < _sprites.Count && i < _spriteLibrary.Count; i++)
         {
             if(_spriteLibrary[i] == null) continue;
-            Rect rect = _spriteLibrary[i].rect;
+            Rect rect = _spriteLibrary[i].textureRect;
             _sprites[i] = new TextureData
             {
                 canvasPos = _sprites[i].canvasPos,
@@ -127,8 +125,8 @@ public class BakedSprite : MonoBehaviour
         _propBlock ??= new MaterialPropertyBlock();
 
         _renderer.GetPropertyBlock(_propBlock);
-        // _propBlock.SetTexture("_MainTex", _renderTexture); // Standart shader'lar için
-        _propBlock.SetTexture("_BaseMap", _renderTexture); // URP shader'ları için
+        _propBlock.SetTexture("_MainTex", _renderTexture); // Standart shader'lar
+        _propBlock.SetTexture("_BaseMap", _renderTexture); // URP shader'ları
         _renderer.SetPropertyBlock(_propBlock);
     }
 
@@ -139,4 +137,5 @@ public class BakedSprite : MonoBehaviour
         _renderTexture?.Release();
         _renderTexture = null;
     }
+
 }
