@@ -1,0 +1,47 @@
+#pragma kernel CSMain
+
+struct TextureData {
+    float2 canvasPos;
+    int layerIndex;
+    float2 spriteOffset;
+    float2 canvasSize;
+};
+
+Texture2D<float4> TempSprite;
+StructuredBuffer<TextureData> TextureDataBuffer;
+int DataIndex;
+RWTexture2D<float4> Result;
+
+[numthreads(8, 8, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    uint width, height;
+    Result.GetDimensions(width, height);
+    if (id.x >= width || id.y >= height) return;
+
+    // Şimdilik temiz bir başlangıç yapalım
+    // Eğer DataIndex 0 ise (ilk sprite çiziliyorsa) ekranı temizle
+    if(DataIndex == 0) Result[id.xy] = float4(0,0,0,0);
+
+    // Listeden bu sprite'ın verisini al
+    TextureData data = TextureDataBuffer[DataIndex];
+
+    // id.xy koordinatı bu sprite'ın çizilmesi gereken kutunun içinde mi?
+    if (id.x >= data.canvasPos.x && id.x < data.canvasPos.x + data.canvasSize.x &&
+        id.y >= data.canvasPos.y && id.y < data.canvasPos.y + data.canvasSize.y)
+    {
+        // Sprite içindeki lokal pikseli bul (0 ile size arası)
+        uint2 localPixel = uint2(id.x - data.canvasPos.x, id.y - data.canvasPos.y);
+        
+        // ÖNEMLİ: Eğer sprite texture içindeyse, sprite.rect.position'ı buraya eklemelisin!
+        // Şimdilik sprite'ın texture'ın (0,0)'ında olduğunu varsayıyoruz:
+        uint2 realReadCoord = localPixel + (uint2)data.spriteOffset;
+        float4 spriteCol = TempSprite[realReadCoord];
+
+        // Alpha blending (Boşlukları çizme)
+        if(spriteCol.a > 0.01)
+        {
+            Result[id.xy] = spriteCol;
+        }
+    }
+}
