@@ -23,13 +23,13 @@ ___
 And you're done! SpriteBaker will now appear in your project. You can attach it to any GameObject as a component.
 
 ---
-## Features :
+## Features
 - GPU-side sprite composition (No CPU overhead).
 - Support for multiple sprites with custom positions and sizes.
 - RenderTexture-based output for dynamic materials.
 
 ---
-## Performance :
+## Performance
 This plugin is designed to offload heavy texture operations from the CPU to the GPU, utilizing the parallel processing power of Compute Shaders.
 <br></br>
 ### Why Compute Shaders?
@@ -48,7 +48,7 @@ Traditional texture baking in Unity often relies on Texture2D.SetPixels, which r
 |Latency |Heavy (Millisecond range) |Ultra-Low (Microsecond range)|
 
 ---
-## Tech Stack :
+## Tech Stack
 Unity, HLSL, Compute Shaders.
 
 ---
