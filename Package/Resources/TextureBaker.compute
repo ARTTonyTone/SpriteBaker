@@ -2,7 +2,7 @@
 
 struct TextureData {
     float2 canvasPos;
-    int layerIndex;
+    float4 color;
     float2 spriteOffset;
     float2 canvasSize;
 };
@@ -29,7 +29,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         uint2 localPixel = uint2(id.x - data.canvasPos.x, id.y - data.canvasPos.y);
         
         uint2 realReadCoord = localPixel + (uint2)data.spriteOffset;
-        float4 spriteCol = TempSprite[realReadCoord];
+        float4 spriteCol = TempSprite[realReadCoord]*data.color;
 
         if(spriteCol.a > 0.01)
         {
